@@ -28,7 +28,7 @@ html(page, height=800, scrolling=True)
 @st.cache_resource
 def load_detector():
     # Ganti path ke file best.pt sesuai lokasi model Anda
-    return YOLO("runs/train/plat_yolo_lanjut/weights/best.pt")
+    return YOLO("best.pt")
 
 detector = load_detector()
 
