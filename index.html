@@ -1,0 +1,1754 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlatIQ - Sistem Cerdas mengenali Plat Kendaraan</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #1E88E5;
+            --secondary: #64B5F6;
+            --accent: #4CAF50;
+            --accent2: #FFC107;
+            --danger: #F44336;
+            --light: #FFFFFF;
+            --dark: #0D47A1;
+            --gray: #5f6368;
+            --glass: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(200, 200, 200, 0.5);
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --success-bg: rgba(76, 175, 80, 0.15);
+            --warning-bg: rgba(255, 193, 7, 0.15);
+            --error-bg: rgba(244, 67, 54, 0.15);
+        }
+
+        body {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(30, 136, 229, 0.1) 0%, transparent 40%),
+                        radial-gradient(circle at bottom left, rgba(76, 175, 80, 0.1) 0%, transparent 40%);
+            z-index: -1;
+        }
+
+        /* Header & Navigation - Responsif */
+        header {
+            background: var(--light);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            padding: 10px 0;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 10px 0;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            color: var(--primary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 10px;
+            list-style: none;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        nav a {
+            color: var(--dark);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 8px 12px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: block;
+        }
+
+        nav a:hover {
+            background: rgba(30, 136, 229, 0.1);
+        }
+
+        nav a.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        nav a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent);
+            animation: pulse 1s infinite;
+        }
+
+        /* Hero Section - Responsif */
+        .hero {
+            padding: 80px 20px;
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+            line-height: 1.3;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: #455A64;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: 0.5s;
+            z-index: -1;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-blue {
+            background: linear-gradient(to right, #3B82F6, #2563EB);
+            color: white;
+        }
+
+        .btn-red {
+            background: linear-gradient(to right, var(--danger), #dc2626);
+            color: white;
+        }
+
+        .btn-yellow {
+            background: linear-gradient(to right, var(--accent2), #FFA000);
+            color: white;
+        }
+
+        /* Features Section - Responsif */
+        .features {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .section-title h2 {
+            font-size: 2rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .section-title p {
+            font-size: 1.1rem;
+            color: #546E7A;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .feature-card {
+            background: var(--light);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: var(--shadow);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(30, 136, 229, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 1.8rem;
+            color: var(--primary);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .feature-card p {
+            color: #546E7A;
+            line-height: 1.6;
+            font-size: 0.95rem;
+        }
+
+        /* Recognition System - Responsif */
+        .recognition-system {
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(5px);
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .system-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 40px;
+            align-items: center;
+        }
+
+        .system-content h2 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: var(--dark);
+        }
+
+        .system-content p {
+            font-size: 1.1rem;
+            color: #455A64;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .system-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-item {
+            background: rgba(30, 136, 229, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #546E7A;
+            font-size: 0.95rem;
+        }
+
+        .system-image {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            height: 300px;
+            background: linear-gradient(135deg, var(--primary), #64B5F6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .system-image-content {
+            text-align: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .system-image-content i {
+            font-size: 6rem;
+            color: rgba(255, 255, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .system-image-content h3 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+
+        /* Demo Section - Responsif */
+        .recognition-demo {
+            padding: 40px 20px 80px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-container {
+            background: var(--light);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .demo-title {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            text-align: center;
+        }
+
+        .demo-title i {
+            color: var(--primary);
+        }
+
+        .demo-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        /* Demo Card Styles */
+        .demo-card {
+            background: var(--light);
+            border-radius: 15px;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .demo-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(30, 136, 229, 0.05) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary);
+        }
+
+        .card-title i {
+            color: var(--primary);
+            font-size: 1.3rem;
+        }
+
+        .card-title h2 {
+            font-size: 1.3rem;
+            color: var(--dark);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--primary);
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+            background: rgba(30, 136, 229, 0.05);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .upload-area:hover {
+            background: rgba(30, 136, 229, 0.1);
+        }
+
+        .upload-area i {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        .upload-area p {
+            margin-bottom: 10px;
+            color: #546E7A;
+            font-size: 0.95rem;
+        }
+
+        .camera-control {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .camera-feed {
+            width: 100%;
+            height: 250px;
+            background: #f0f4f8;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--primary);
+        }
+
+        .camera-feed video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .camera-placeholder {
+            color: #78909C;
+            font-size: 1rem;
+            text-align: center;
+            padding: 15px;
+        }
+
+        .camera-placeholder i {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .result-container {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .result-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .result-title i {
+            color: var(--accent2);
+        }
+
+        .result-content {
+            background: rgba(0, 0, 0, 0.03);
+            border-radius: 10px;
+            padding: 15px;
+            min-height: 120px;
+        }
+
+        .ocr-result-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .image-with-box {
+            position: relative;
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--primary);
+        }
+
+        .image-with-box img {
+            width: 100%;
+            display: block;
+        }
+
+        .detection-box {
+            position: absolute;
+            border: 3px solid var(--accent2);
+            box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+            z-index: 10;
+        }
+
+        .plate-result {
+            background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--primary);
+        }
+
+        .plate-result::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 50%, rgba(255, 255, 255, 0.1) 50%);
+            background-size: 5px 5px;
+            z-index: 0;
+        }
+
+        .plate-number {
+            font-size: 1.8rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: var(--dark);
+            font-family: 'Courier New', monospace;
+            position: relative;
+            z-index: 1;
+            word-break: break-all;
+        }
+
+        .info-text {
+            color: var(--dark);
+            margin-top: 8px;
+            font-size: 0.9rem;
+        }
+
+        .fps-indicator {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 4px 8px;
+            border-radius: 5px;
+            font-size: 0.8rem;
+            color: var(--accent);
+            z-index: 10;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            font-size: 0.9rem;
+            color: #78909C;
+            text-align: center;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to bottom, rgba(30, 136, 229, 0.5), transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0; }
+            100% { top: 100%; }
+        }
+
+        .status-indicator {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.75rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 2px 6px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent);
+        }
+
+        .status-dot.recording {
+            background-color: var(--danger);
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Processing Indicator */
+        .processing-indicator {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            margin: 15px 0;
+        }
+        
+        .processing-indicator .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        .processing-indicator p {
+            color: var(--dark);
+            font-weight: 500;
+        }
+        
+        /* Alert Styles */
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            display: none;
+            position: relative;
+        }
+        
+        .alert-success {
+            background-color: var(--success-bg);
+            border-left: 4px solid var(--accent);
+        }
+        
+        .alert-warning {
+            background-color: var(--warning-bg);
+            border-left: 4px solid var(--accent2);
+        }
+        
+        .alert-error {
+            background-color: var(--error-bg);
+            border-left: 4px solid var(--danger);
+        }
+        
+        .alert-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .alert-title i {
+            font-size: 1.2rem;
+        }
+        
+        .alert p {
+            color: #455A64;
+            line-height: 1.5;
+            margin-left: 28px;
+        }
+        
+        /* OCR Details */
+        .ocr-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .detail-card {
+            background: rgba(30, 136, 229, 0.08);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .detail-card h4 {
+            font-size: 0.9rem;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+        
+        .detail-card p {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            border-top: 1px solid var(--glass-border);
+            padding: 50px 20px 25px;
+            color: white;
+        }
+        
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .footer-logo {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .footer-logo i {
+            font-size: 1.8rem;
+            color: var(--accent);
+        }
+        
+        .footer-logo span {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .footer-about p {
+            color: #BBDEFB;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            font-size: 0.95rem;
+        }
+        
+        .footer-links h3 {
+            font-size: 1.2rem;
+            color: white;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 8px;
+        }
+        
+        .footer-links h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        
+        .footer-links ul {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 10px;
+        }
+        
+        .footer-links a {
+            color: #BBDEFB;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+        
+        .footer-links a i {
+            color: var(--accent);
+            font-size: 0.8rem;
+        }
+        
+        .footer-contact h3 {
+            font-size: 1.2rem;
+            color: white;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 8px;
+        }
+        
+        .footer-contact h3::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+            border-radius: 3px;
+        }
+        
+        .contact-item {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .contact-item i {
+            font-size: 1.1rem;
+            color: var(--accent);
+            margin-top: 4px;
+        }
+        
+        .contact-item div p {
+            color: #BBDEFB;
+            line-height: 1.5;
+            font-size: 0.95rem;
+        }
+        
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 40px auto 0;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: #BBDEFB;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Breakpoints */
+        @media (min-width: 768px) {
+            .header-container {
+                flex-wrap: nowrap;
+            }
+            
+            nav ul {
+                gap: 20px;
+            }
+            
+            .hero {
+                padding: 100px 20px;
+            }
+            
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            
+            .hero p {
+                font-size: 1.2rem;
+            }
+            
+            .features {
+                padding: 80px 20px;
+            }
+            
+            .recognition-system {
+                padding: 80px 20px;
+            }
+            
+            .system-container {
+                grid-template-columns: 1fr 1fr;
+                gap: 40px;
+            }
+            
+            .recognition-demo {
+                padding: 50px 20px 100px;
+            }
+            
+            .demo-content {
+                grid-template-columns: 1fr 1fr;
+                gap: 30px;
+            }
+            
+            .camera-feed {
+                height: 280px;
+            }
+        }
+
+        @media (min-width: 992px) {
+            .hero h1 {
+                font-size: 3.2rem;
+            }
+            
+            .hero p {
+                font-size: 1.3rem;
+            }
+            
+            .system-image {
+                height: 350px;
+            }
+            
+            .camera-feed {
+                height: 300px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .btn {
+                width: 100%;
+                padding: 12px;
+            }
+            
+            .hero-buttons {
+                gap: 10px;
+            }
+            
+            .camera-control .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <div class="logo">
+                <i class="fas fa-car-alt logo-icon"></i>
+                <span class="logo-text">PlatIQ</span>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home" class="active">Beranda</a></li>
+                    <li><a href="#features">Fitur</a></li>
+                    <li><a href="#system">Teknologi</a></li>
+                    <li><a href="#demo">Demo</a></li>
+                    <li><a href="#footer">Kontak</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <h1>Sistem Pengenalan Plat Kendaraan Canggih</h1>
+        <p>Solusi terdepan untuk identifikasi kendaraan otomatis dengan teknologi AI dan OCR tingkat lanjut. Deteksi plat kendaraan secara real-time dengan akurasi tinggi.</p>
+        <div class="hero-buttons">
+            <a href="#demo" class="btn btn-primary">Coba Demo Sekarang</a>
+            <a href="#system" class="btn btn-outline">Pelajari Lebih Lanjut</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="section-title">
+            <h2>Fitur Unggulan Kami</h2>
+            <p>Teknologi mutakhir yang kami tawarkan untuk kebutuhan identifikasi kendaraan Anda</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>Deteksi Real-time</h3>
+                <p>Mendeteksi plat kendaraan secara langsung dari kamera CCTV dengan kecepatan tinggi dan akurasi yang tak tertandingi.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3>Kecerdasan Buatan</h3>
+                <p>Ditenagai oleh algoritma machine learning yang terus belajar untuk meningkatkan akurasi deteksi dari waktu ke waktu.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <h3>Analisis Gambar/Video</h3>
+                <p>Upload gambar atau video untuk dianalisis secara instan. Sistem kami mampu mengenali plat dari berbagai sudut.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recognition System -->
+    <section id="system" class="recognition-system">
+        <div class="system-container">
+            <div class="system-content">
+                <h2>Bagaimana Sistem Kami Bekerja?</h2>
+                <p>PlatIQ menggunakan teknologi penglihatan komputer dan pengenalan karakter optik (OCR) canggih untuk mendeteksi dan mengenali plat kendaraan secara otomatis.</p>
+                <p>Proses deteksi kami melalui beberapa tahap presisi untuk memastikan hasil yang akurat dalam berbagai kondisi.</p>
+                
+                <div class="system-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">99.7%</div>
+                        <div class="stat-label">Akurasi Deteksi</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">&lt;1s</div>
+                        <div class="stat-label">Waktu Proses</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">24/7</div>
+                        <div class="stat-label">Operasional</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">100+</div>
+                        <div class="stat-label">Format Plat</div>
+                    </div>
+                </div>
+            </div>
+            <div class="system-image">
+                <div class="system-image-content">
+                    <i class="fas fa-car"></i>
+                    <h3>Proses Pengenalan Plat</h3>
+                    <p>Deteksi → Segmentasi → OCR → Validasi</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recognition Demo -->
+    <section id="demo" class="recognition-demo">
+        <div class="section-title">
+            <h2>Coba Sistem Deteksi Kami</h2>
+            <p>Uji kemampuan sistem pengenalan plat kendaraan secara langsung</p>
+        </div>
+        <div class="demo-container">
+            <div class="demo-title">
+                <i class="fas fa-cogs"></i>
+                <h3>Deteksi Plat Kendaraan Otomatis</h3>
+            </div>
+            
+            <div class="demo-content">
+                <div class="demo-card">
+                    <div class="card-title">
+                        <i class="fas fa-upload"></i>
+                        <h2>Upload Gambar/Video</h2>
+                    </div>
+                    
+                    <div class="alert alert-success" id="successAlert" style="display: none;">
+                        <div class="alert-title">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Plat Berhasil Dikenali!</span>
+                        </div>
+                        <p>Sistem berhasil mendeteksi plat kendaraan dengan akurasi tinggi.</p>
+                    </div>
+                    
+                    <div class="alert alert-warning" id="warningAlert" style="display: none;">
+                        <div class="alert-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Plat Tidak Terdeteksi</span>
+                        </div>
+                        <p>Sistem tidak dapat mendeteksi plat kendaraan. Pastikan gambar jelas dan plat terlihat.</p>
+                    </div>
+                    
+                    <div class="alert alert-error" id="errorAlert" style="display: none;">
+                        <div class="alert-title">
+                            <i class="fas fa-times-circle"></i>
+                            <span>Format File Tidak Didukung</span>
+                        </div>
+                        <p>Silakan unggah file gambar (JPG, PNG, atau JPEG). File yang Anda unggah tidak valid.</p>
+                    </div>
+                    
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Seret & lepas gambar atau video di sini</p>
+                        <p>Atau</p>
+                        <input type="file" id="fileInput" accept="image/*,video/*" hidden>
+                        <button class="btn btn-blue" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-folder-open"></i> Pilih File
+                        </button>
+                    </div>
+                    
+                    <div class="file-info" id="fileInfo">
+                        Belum ada file yang dipilih
+                    </div>
+                    
+                    <div class="processing-indicator" id="processingIndicator">
+                        <div class="spinner"></div>
+                        <p>Mengidentifikasi plat kendaraan...</p>
+                    </div>
+                    
+                    <div class="result-container">
+                        <div class="result-title">
+                            <i class="fas fa-image"></i>
+                            <h3>Preview Media</h3>
+                        </div>
+                        <div class="result-content" id="mediaPreview">
+                            <p style="text-align: center; color: #78909C;">
+                                <i class="fas fa-image"></i><br>
+                                Preview akan muncul di sini setelah upload
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="demo-card">
+                    <div class="card-title">
+                        <i class="fas fa-video"></i>
+                        <h2>Kamera Langsung</h2>
+                    </div>
+                    
+                    <div class="camera-feed" id="cameraFeed">
+                        <div class="camera-overlay">
+                            <div class="scan-line"></div>
+                        </div>
+                        <div class="camera-placeholder">
+                            <i class="fas fa-camera"></i>
+                            Kamera belum diaktifkan
+                        </div>
+                    </div>
+                    
+                    <div class="camera-control">
+                        <button class="btn btn-primary" id="startCameraBtn">
+                            <i class="fas fa-power-off"></i> Nyalakan Kamera
+                        </button>
+                        <button class="btn btn-red" id="stopCameraBtn" disabled>
+                            <i class="fas fa-stop-circle"></i> Matikan Kamera
+                        </button>
+                    </div>
+                    
+                    <button class="btn btn-yellow" id="captureBtn" style="width: 100%; margin-top: 15px;" disabled>
+                        <i class="fas fa-camera"></i> Ambil Gambar untuk Deteksi Plat
+                    </button>
+                    
+                    <div class="result-container">
+                        <div class="result-title">
+                            <i class="fas fa-car"></i>
+                            <h3>Hasil Deteksi Plat Kendaraan</h3>
+                        </div>
+                        <div class="result-content">
+                            <div class="ocr-result-container">
+                                <div class="image-with-box" id="detectedImageContainer">
+                                    <!-- Gambar dengan bounding box akan muncul di sini -->
+                                </div>
+                                <div class="plate-result">
+                                    <div class="plate-number" id="plateNumber">B 1234 XYZ</div>
+                                    <div class="info-text">Plat terdeteksi otomatis</div>
+                                </div>
+                                <div class="ocr-details">
+                                    <div class="detail-card">
+                                        <h4>Tingkat Akurasi</h4>
+                                        <p id="accuracy">97.3%</p>
+                                    </div>
+                                    <div class="detail-card">
+                                        <h4>Wilayah</h4>
+                                        <p id="region">Jakarta</p>
+                                    </div>
+                                    <div class="detail-card">
+                                        <h4>Jenis Kendaraan</h4>
+                                        <p id="vehicleType">Mobil</p>
+                                    </div>
+                                    <div class="detail-card">
+                                        <h4>Warna</h4>
+                                        <p id="color">Hitam</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <div class="footer-container">
+            <div class="footer-about">
+                <div class="footer-logo">
+                    <i class="fas fa-car-alt"></i>
+                    <span>PlatIQ</span>
+                </div>
+                <p>Penyedia solusi teknologi pengenalan plat kendaraan terdepan dengan akurasi tinggi dan kecepatan deteksi yang unggul.</p>
+                <p>Mengubah cara Anda dalam mengelola akses kendaraan dan sistem keamanan.</p>
+            </div>
+            
+            <div class="footer-links">
+                <h3>Tautan Cepat</h3>
+                <ul>
+                    <li><a href="#home"><i class="fas fa-chevron-right"></i> Beranda</a></li>
+                    <li><a href="#features"><i class="fas fa-chevron-right"></i> Fitur</a></li>
+                    <li><a href="#system"><i class="fas fa-chevron-right"></i> Teknologi</a></li>
+                    <li><a href="#demo"><i class="fas fa-chevron-right"></i> Demo</a></li>
+                    <li><a href="#footer"><i class="fas fa-chevron-right"></i> Kontak</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-contact">
+                <h3>Hubungi Kami</h3>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <p>Jl. Dr Mansyur</p>
+                        <p>Sumatera Utara, Indonesia</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone-alt"></i>
+                    <div>
+                        <p>+62 821 3775 5572</p>
+                        <p>ig: @teresiatlt_</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <p>info@platiq.com</p>
+                        <p>support@platiq.com</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>&copy; 2023 Malkan Vision. Hak Cipta Dilindungi. | L2or564 | TEL: 031264</p>
+            <p>Sistem deteksi plat kendaraan otomatis dengan teknologi OCR canggih</p>
+        </div>
+    </footer>
+
+    <script>
+        // Elemen DOM
+        const fileInput = document.getElementById('fileInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInfo = document.getElementById('fileInfo');
+        const mediaPreview = document.getElementById('mediaPreview');
+        const startCameraBtn = document.getElementById('startCameraBtn');
+        const stopCameraBtn = document.getElementById('stopCameraBtn');
+        const captureBtn = document.getElementById('captureBtn');
+        const cameraFeed = document.getElementById('cameraFeed');
+        const plateNumber = document.getElementById('plateNumber');
+        const detectedImageContainer = document.getElementById('detectedImageContainer');
+        const processingIndicator = document.getElementById('processingIndicator');
+        const successAlert = document.getElementById('successAlert');
+        const warningAlert = document.getElementById('warningAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const accuracy = document.getElementById('accuracy');
+        const region = document.getElementById('region');
+        const vehicleType = document.getElementById('vehicleType');
+        const color = document.getElementById('color');
+        
+        // Variabel global
+        let stream = null;
+        let videoElement = null;
+        let fpsInterval;
+        let cameraActive = false;
+        
+        // Event listener untuk upload file
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                fileInfo.innerHTML = `File: ${file.name} (${formatFileSize(file.size)})`;
+                
+                // Validasi file
+                const validTypes = ['image/jpeg', 'image/png', 'image/jpg', 'video/mp4'];
+                if (!validTypes.includes(file.type)) {
+                    showError('Format file tidak didukung. Silakan unggah file gambar (JPG, PNG) atau video (MP4).');
+                    return;
+                }
+                
+                // Sembunyikan semua alert
+                hideAllAlerts();
+                // Tampilkan indikator pemrosesan
+                processingIndicator.style.display = 'block';
+                
+                // Tampilkan preview setelah 1 detik (simulasi pemrosesan)
+                setTimeout(() => {
+                    if (file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            mediaPreview.innerHTML = `<img src="${e.target.result}" alt="Preview" style="max-width: 100%; border-radius: 10px;">`;
+                            simulateOCRDetection(e.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    } else if (file.type.startsWith('video/')) {
+                        mediaPreview.innerHTML = `
+                            <video controls style="max-width: 100%; border-radius: 10px;">
+                                <source src="${URL.createObjectURL(file)}" type="${file.type}">
+                                Browser tidak mendukung video.
+                            </video>
+                        `;
+                        // Untuk video, kita akan mengambil frame pertama sebagai simulasi
+                        simulateOCRDetection('https://via.placeholder.com/600x400?text=Contoh+Kendaraan');
+                    }
+                    
+                    // Sembunyikan indikator pemrosesan
+                    processingIndicator.style.display = 'none';
+                }, 1500);
+            }
+        });
+        
+        // Format ukuran file
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
+        // Event listener untuk drag and drop
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#FFC107';
+            uploadArea.style.backgroundColor = 'rgba(30, 136, 229, 0.1)';
+        });
+        
+        uploadArea.addEventListener('dragleave', function() {
+            uploadArea.style.borderColor = '#1E88E5';
+            uploadArea.style.backgroundColor = 'rgba(30, 136, 229, 0.05)';
+        });
+        
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#1E88E5';
+            uploadArea.style.backgroundColor = 'rgba(30, 136, 229, 0.05)';
+            
+            const file = e.dataTransfer.files[0];
+            if (file && (file.type.startsWith('image/') || file.type.startsWith('video/'))) {
+                fileInput.files = e.dataTransfer.files;
+                const event = new Event('change', { bubbles: true });
+                fileInput.dispatchEvent(event);
+            } else {
+                showError('Silakan upload file gambar atau video');
+            }
+        });
+        
+        // Fungsi untuk menyalakan kamera
+        async function startCamera() {
+            if (cameraActive) return;
+            
+            try {
+                // Meminta akses ke kamera
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 }
+                    } 
+                });
+                
+                // Hapus placeholder
+                cameraFeed.innerHTML = '<div class="camera-overlay"><div class="scan-line"></div></div>';
+                
+                // Buat elemen video
+                videoElement = document.createElement('video');
+                videoElement.srcObject = stream;
+                videoElement.autoplay = true;
+                videoElement.playsInline = true;
+                videoElement.style.width = '100%';
+                videoElement.style.height = '100%';
+                videoElement.style.objectFit = 'cover';
+                
+                // Tambahkan FPS indicator
+                const fpsIndicator = document.createElement('div');
+                fpsIndicator.className = 'fps-indicator';
+                fpsIndicator.id = 'fpsIndicator';
+                fpsIndicator.innerHTML = 'FPS: 0';
+                
+                // Tambahkan status indicator
+                const statusIndicator = document.createElement('div');
+                statusIndicator.className = 'status-indicator';
+                statusIndicator.innerHTML = '<div class="status-dot recording"></div> LIVE';
+                
+                cameraFeed.appendChild(videoElement);
+                cameraFeed.appendChild(fpsIndicator);
+                cameraFeed.appendChild(statusIndicator);
+                
+                // Aktifkan tombol
+                startCameraBtn.disabled = true;
+                stopCameraBtn.disabled = false;
+                captureBtn.disabled = false;
+                
+                cameraActive = true;
+                
+                // Mulai perhitungan FPS
+                startFPSCounter();
+                
+            } catch (err) {
+                // Error handling yang lebih baik
+                console.error('Error accessing camera:', err);
+                cameraFeed.innerHTML = `
+                    <div class="camera-overlay">
+                        <div class="scan-line"></div>
+                    </div>
+                    <div class="camera-placeholder" style="color: #F44336;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Kamera tidak dapat diakses</p>
+                        <p style="font-size: 0.9rem;">${err.message || 'Pastikan browser mendukung kamera'}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Fungsi untuk mematikan kamera
+        function stopCamera() {
+            if (!cameraActive) return;
+            
+            if (stream) {
+                const tracks = stream.getTracks();
+                tracks.forEach(track => track.stop());
+                stream = null;
+                
+                // Hentikan perhitungan FPS
+                stopFPSCounter();
+                
+                // Kembalikan ke placeholder
+                cameraFeed.innerHTML = `
+                    <div class="camera-overlay">
+                        <div class="scan-line"></div>
+                    </div>
+                    <div class="camera-placeholder">
+                        <i class="fas fa-camera"></i>
+                        Kamera dimatikan
+                    </div>
+                `;
+                
+                // Nonaktifkan tombol
+                startCameraBtn.disabled = false;
+                stopCameraBtn.disabled = true;
+                captureBtn.disabled = true;
+                
+                cameraActive = false;
+            }
+        }
+        
+        // Fungsi untuk memulai penghitungan FPS
+        function startFPSCounter() {
+            let frameCount = 0;
+            let lastTime = performance.now();
+            
+            fpsInterval = setInterval(() => {
+                const currentTime = performance.now();
+                const elapsed = currentTime - lastTime;
+                
+                if (elapsed >= 1000) {
+                    const fps = Math.round((frameCount * 1000) / elapsed);
+                    document.getElementById('fpsIndicator').innerText = `FPS: ${fps}`;
+                    frameCount = 0;
+                    lastTime = currentTime;
+                }
+            }, 100);
+            
+            // Hitung frame yang di-render
+            function countFrame() {
+                frameCount++;
+                requestAnimationFrame(countFrame);
+            }
+            countFrame();
+        }
+        
+        // Fungsi untuk menghentikan penghitungan FPS
+        function stopFPSCounter() {
+            if (fpsInterval) {
+                clearInterval(fpsInterval);
+            }
+        }
+        
+        // Fungsi untuk mengambil gambar dari kamera
+        function captureImage() {
+            if (!cameraActive || !videoElement) return;
+            
+            // Buat canvas untuk mengambil gambar
+            const canvas = document.createElement('canvas');
+            canvas.width = videoElement.videoWidth;
+            canvas.height = videoElement.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+            
+            const imageData = canvas.toDataURL('image/png');
+            
+            // Simulasikan deteksi OCR
+            simulateOCRDetection(imageData);
+        }
+        
+        // Simulasi deteksi OCR dengan gambar dan bounding box
+        function simulateOCRDetection(imageSrc) {
+            // Tampilkan animasi loading
+            plateNumber.innerHTML = '<span class="loading"></span> Memproses...';
+            detectedImageContainer.innerHTML = '';
+            hideAllAlerts();
+            successAlert.style.display = 'none';
+            warningAlert.style.display = 'none';
+            
+            // Sembunyikan detail sementara
+            document.querySelector('.ocr-details').style.opacity = '0.5';
+            
+            // Setelah 2 detik, tampilkan hasil
+            setTimeout(() => {
+                // 85% kemungkinan sukses, 15% gagal
+                const isSuccess = Math.random() > 0.15;
+                
+                if (isSuccess) {
+                    // Buat nomor plat acak
+                    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    const numbers = '1234567890';
+                    
+                    let plate = '';
+                    plate += letters.charAt(Math.floor(Math.random() * letters.length)) + ' ';
+                    for (let i = 0; i < 4; i++) {
+                        plate += numbers.charAt(Math.floor(Math.random() * numbers.length));
+                    }
+                    plate += ' ';
+                    for (let i = 0; i < 3; i++) {
+                        plate += letters.charAt(Math.floor(Math.random() * letters.length));
+                    }
+                    
+                    plateNumber.textContent = plate;
+                    
+                    // Generate random details
+                    accuracy.textContent = (90 + Math.floor(Math.random() * 10)) + '.' + Math.floor(Math.random() * 10) + '%';
+                    
+                    const regions = ['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Yogyakarta'];
+                    region.textContent = regions[Math.floor(Math.random() * regions.length)];
+                    
+                    const types = ['Mobil', 'Motor', 'Truk', 'Bus', 'Taksi'];
+                    vehicleType.textContent = types[Math.floor(Math.random() * types.length)];
+                    
+                    const colors = ['Hitam', 'Putih', 'Merah', 'Biru', 'Silver', 'Hijau'];
+                    color.textContent = colors[Math.floor(Math.random() * colors.length)];
+                    
+                    // Tambahkan gambar dengan bounding box
+                    detectedImageContainer.innerHTML = `
+                        <img src="${imageSrc}" alt="Detected Vehicle">
+                        <div class="detection-box" style="top: 60%; left: 20%; width: 60%; height: 20%;"></div>
+                    `;
+                    
+                    // Tampilkan alert sukses
+                    successAlert.style.display = 'block';
+                    
+                    // Tambahkan efek visual
+                    plateNumber.style.animation = 'none';
+                    setTimeout(() => {
+                        plateNumber.style.animation = 'pulse 0.5s';
+                    }, 10);
+                } else {
+                    // Tampilkan alert warning
+                    warningAlert.style.display = 'block';
+                    detectedImageContainer.innerHTML = `
+                        <img src="${imageSrc}" alt="Detected Vehicle">
+                    `;
+                    plateNumber.textContent = 'Tidak Terdeteksi';
+                    plateNumber.style.color = '#F44336';
+                }
+                
+                // Tampilkan detail
+                document.querySelector('.ocr-details').style.opacity = '1';
+            }, 2000);
+        }
+        
+        // Fungsi untuk menampilkan error
+        function showError(message) {
+            hideAllAlerts();
+            errorAlert.querySelector('p').textContent = message;
+            errorAlert.style.display = 'block';
+            mediaPreview.innerHTML = `<p style="text-align: center; color: #78909C;"><i class="fas fa-exclamation-circle"></i><br>${message}</p>`;
+            processingIndicator.style.display = 'none';
+        }
+        
+        // Fungsi untuk menyembunyikan semua alert
+        function hideAllAlerts() {
+            successAlert.style.display = 'none';
+            warningAlert.style.display = 'none';
+            errorAlert.style.display = 'none';
+        }
+        
+        // Fungsi untuk update menu aktif berdasarkan scroll
+        function updateActiveMenu() {
+            const sections = document.querySelectorAll('section');
+            const navLinks = document.querySelectorAll('nav a');
+            const headerHeight = document.querySelector('header').offsetHeight;
+            
+            let currentSection = '';
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                
+                if (window.scrollY >= (sectionTop - headerHeight - 50)) {
+                    currentSection = section.getAttribute('id');
+                }
+            });
+            
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').substring(1) === currentSection) {
+                    link.classList.add('active');
+                }
+            });
+        }
+
+        // Fungsi untuk smooth scrolling dan update active class
+        document.querySelectorAll('nav a').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetSection = document.querySelector(targetId);
+                
+                if (targetSection) {
+                    // Update active class
+                    document.querySelectorAll('nav a').forEach(link => {
+                        link.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Smooth scroll
+                    window.scrollTo({
+                        top: targetSection.offsetTop - document.querySelector('header').offsetHeight,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // Event listeners
+        startCameraBtn.addEventListener('click', startCamera);
+        stopCameraBtn.addEventListener('click', stopCamera);
+        captureBtn.addEventListener('click', captureImage);
+        
+        // Inisialisasi saat load
+        window.addEventListener('load', function() {
+            // Tambahkan efek visual pada plat nomor
+            setInterval(() => {
+                plateNumber.style.textShadow = `0 0 ${5 + Math.random() * 10}px rgba(30, 136, 229, ${0.3 + Math.random() * 0.7})`;
+            }, 1000);
+            
+            // Panggil fungsi untuk set active menu awal
+            updateActiveMenu();
+        });
+
+        // Tambahkan event listener untuk scroll
+        window.addEventListener('scroll', updateActiveMenu);
+    </script>
+</body>
+</html>
