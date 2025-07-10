@@ -1,5 +1,6 @@
 streamlit>=1.18
-ultralytics
-opencv-python
-pillow
+ultralytics>=8.0.100   # atau versi yang Anda pakai
 numpy
+pillow
+opencv-python-headless
+pytesseract
